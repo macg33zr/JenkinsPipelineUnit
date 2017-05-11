@@ -1,3 +1,8 @@
+import com.lesfurets.gradle.GitReleaseCommitTask
+import com.lesfurets.gradle.GitTagTask
+import com.lesfurets.gradle.SetNextSnapshotVersionTask
+import com.lesfurets.gradle.SetVersionTask
+
 plugins {
     id "io.codearte.nexus-staging" version "0.8.0"
 }
@@ -65,6 +70,16 @@ jacocoTestReport {
         html.enabled = true
     }
 }
+
+task writeVersion(type: SetVersionTask)
+task tagVersion(type: GitTagTask)
+task commitRelease(type: GitReleaseCommitTask)
+task nextSnapshot(type: SetNextSnapshotVersionTask)
+
+commitRelease.mustRunAfter(writeVersion)
+tagVersion.mustRunAfter(writeVersion, commitRelease)
+
+task release(dependsOn: [writeVersion, tagVersion, commitRelease])
 
 uploadArchives {
     repositories {
